@@ -13,8 +13,38 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { query } from "@/config/ApolloClient";
+import { gql } from "@apollo/client";
+import { cookies } from "next/headers";
 
-export default function ChatPage() {
+export default async function ChatPage() {
+  const cookieStore = await cookies();
+
+  const userQuery = gql`
+    query SearchUsers($userName: String!) {
+      searchUsers(input: { userName: $userName }) {
+        createdAt
+        email
+        firstName
+        id
+        lastName
+        updatedAt
+        userName
+      }
+    }
+  `;
+
+  const { data } = await query({
+    query: userQuery,
+    variables: { userName: "" },
+    context: {
+      headers: {
+        cookie: cookieStore,
+      },
+    },
+  });
+  console.log("🚀 ~ ChatPage ~ data:", data);
+
   return (
     <SidebarProvider
       style={
