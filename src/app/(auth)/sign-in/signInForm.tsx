@@ -14,24 +14,54 @@ import { Label } from "@/components/ui/label";
 import { gql, useMutation } from "@apollo/client";
 import { useRouter } from "next/navigation";
 import { BASE_ROUTES } from "@/constants";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { FormProvider, RHFInput } from "@/components/hook-forms";
+
+const signInFormSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
+type SignInFormSchema = z.infer<typeof signInFormSchema>;
+
+const logInUserMutation = gql`
+  mutation LoginUser($email: String!, $password: String!) {
+    loginUser(input: { email: $email, password: $password }) {
+      message
+      success
+    }
+  }
+`;
 
 export default function SignInForm() {
   const router = useRouter();
 
-  const logInUserMutation = gql`
-    mutation LoginUser($email: String!, $password: String!) {
-      loginUser(input: { email: $email, password: $password }) {
-        message
-        success
-      }
-    }
-  `;
+  const methods = useForm<SignInFormSchema>({
+    resolver: zodResolver(signInFormSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+  const { handleSubmit } = methods;
 
   const [loginUser, { loading, error, data }] = useMutation(logInUserMutation);
 
-  if (data?.loginUser?.success) {
-    router.push(`${BASE_ROUTES.CHAT}`);
-  }
+  const callLoginUser = async (values: SignInFormSchema) => {
+    const { email, password } = values;
+    const res = await loginUser({
+      variables: { email, password },
+    });
+
+    if (res?.data?.loginUser.success) {
+      router.push(BASE_ROUTES.CHAT);
+    }
+  };
+
+  const onSubmit = handleSubmit((values: SignInFormSchema) => {
+    callLoginUser(values);
+  });
 
   return (
     <div className={cn("flex flex-col gap-6")}>
@@ -43,50 +73,23 @@ export default function SignInForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
+          <FormProvider methods={methods} onSubmit={onSubmit}>
+            <div className="flex flex-col gap-8 mt-2">
+              <div className="flex flex-col space-y-4">
+                <RHFInput
+                  label="Your email address"
+                  name="email"
                   type="email"
-                  placeholder="m@example.com"
-                  //   required
                 />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                  <a
-                    href="#"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  // required
-                />
+                <RHFInput label="Password" name="password" type="password" />
               </div>
               <Button
-                type="button"
-                disabled={loading}
+                size="default"
+                type="submit"
                 className="w-full"
-                onClick={(e) => {
-                  e.preventDefault();
-                  const email = "kumar@gmail";
-                  const password = "kumar";
-                  loginUser({
-                    variables: { email, password },
-                  });
-                }}
+                disabled={loading}
               >
                 Login
-              </Button>
-              <Button variant="outline" className="w-full">
-                Login with Google
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
@@ -95,7 +98,7 @@ export default function SignInForm() {
                 Sign up
               </a>
             </div>
-          </form>
+          </FormProvider>
         </CardContent>
       </Card>
     </div>
