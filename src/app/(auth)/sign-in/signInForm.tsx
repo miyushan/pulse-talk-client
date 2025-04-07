@@ -68,23 +68,19 @@ export default function SignInForm() {
   });
 
   return (
-    <div className={cn("flex flex-col gap-6")}>
+    <div className={cn("max-w-md mx-auto flex flex-col gap-6")}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardTitle className="text-2xl">Sign In</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Enter your email and password below to login to your account
           </CardDescription>
         </CardHeader>
         <CardContent>
           <FormProvider methods={methods} onSubmit={onSubmit}>
             <div className="flex flex-col gap-8 mt-2">
               <div className="flex flex-col space-y-4">
-                <RHFInput
-                  label="Your email address"
-                  name="email"
-                  type="email"
-                />
+                <RHFInput label="Email address" name="email" type="email" />
                 <RHFInput label="Password" name="password" type="password" />
               </div>
               <Button
@@ -98,7 +94,10 @@ export default function SignInForm() {
             </div>
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{" "}
-              <a href="#" className="underline underline-offset-4">
+              <a
+                className="underline underline-offset-4 cursor-pointer"
+                onClick={() => router.push(BASE_ROUTES.SIGN_UP)}
+              >
                 Sign up
               </a>
             </div>
