@@ -158,9 +158,6 @@ export const AppSidebar = ({
       className="overflow-hidden [&>[data-sidebar=sidebar]]:flex-row"
       {...props}
     >
-      {/* This is the first sidebar */}
-      {/* We disable collapsible and adjust width to icon. */}
-      {/* This will make the sidebar appear as icons. */}
       <Sidebar
         collapsible="none"
         className="!w-[calc(var(--sidebar-width-icon)_+_1px)] border-r"
@@ -174,67 +171,25 @@ export const AppSidebar = ({
                     <Command className="size-4" />
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">Acme Inc</span>
-                    <span className="truncate text-xs">Enterprise</span>
+                    <span className="truncate font-semibold">Pulse Talk</span>
+                    <span className="truncate text-xs">Chat</span>
                   </div>
                 </a>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupContent className="px-1.5 md:px-0">
-              <SidebarMenu>
-                {data.navMain.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      tooltip={{
-                        children: item.title,
-                        hidden: false,
-                      }}
-                      onClick={() => {
-                        setActiveItem(item);
-                        const mail = data.mails.sort(() => Math.random() - 0.5);
-                        setMails(
-                          mail.slice(
-                            0,
-                            Math.max(5, Math.floor(Math.random() * 10) + 1)
-                          )
-                        );
-                        setOpen(true);
-                      }}
-                      isActive={activeItem?.title === item.title}
-                      className="px-2.5 md:px-2"
-                    >
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
+        <SidebarContent></SidebarContent>
         <SidebarFooter>
           <NavUser user={data.user} />
         </SidebarFooter>
       </Sidebar>
 
-      {/* This is the second sidebar */}
-      {/* We disable collapsible and let it fill remaining space */}
       <Sidebar collapsible="none" className="hidden flex-1 md:flex">
         <SidebarHeader className="gap-3.5 border-b p-4">
-          <div className="flex w-full items-center justify-between">
-            <div className="text-base font-medium text-foreground">
-              {activeItem?.title}
-            </div>
-            <Label className="flex items-center gap-2 text-sm">
-              <span>Unreads</span>
-              <Switch className="shadow-none" />
-            </Label>
-          </div>
-          <SidebarInput placeholder="Type to search..." />
+          <div className=" text-xl font-bold text-foreground">Pulse Talk</div>
+
+          <SidebarInput placeholder="Search..." />
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup className="px-0">
