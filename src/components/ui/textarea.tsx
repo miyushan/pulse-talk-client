@@ -3,24 +3,22 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Label } from "./label";
 
-export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface TextareaProps
+  extends React.InputHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   description?: string;
   errorMessage?: string;
   fullWidth?: boolean;
   multiline?: boolean;
-  endAdornment?: React.ReactNode;
   classNames?: {
     root?: string;
-    inputContainer?: string;
     input?: string;
     description?: string;
     errorMessage?: string;
   };
 }
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
+const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   (
     {
       className,
@@ -29,7 +27,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       description,
       fullWidth,
       errorMessage,
-      endAdornment,
       classNames,
       ...props
     },
@@ -42,30 +39,17 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {label}
           </Label>
         )}
-        <div
+        <textarea
           className={cn(
-            `flex items-center w-full rounded-md border border-input bg-transparent overflow-hidden text-base
-           placeholder:text-gray-400
-           focus-within:outline-none focus-within:ring-1 focus-within:ring-ring focus-within:border-ring disabled:cursor-not-allowed disabled:opacity-50 `,
-            {
-              "focus-within:ring-red-500 border-red-500 focus-within:border-red-500":
-                errorMessage,
-            },
-            classNames?.inputContainer
+            `flex min-h-[60px] w-full rounded-md border border-input bg-transparent 
+            px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none 
+            focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50`,
+            { "focus-visible:ring-red-500 border-red-500": errorMessage },
+            classNames?.input
           )}
-        >
-          <input
-            type={type}
-            className={cn(
-              `w-full focus-visible:outline-none px-3 min-h-10`,
-              classNames?.input
-            )}
-            ref={ref}
-            {...props}
-          />
-          {endAdornment && <div className="px-2">{endAdornment}</div>}
-        </div>
-
+          ref={ref}
+          {...props}
+        />
         {description && (
           <p
             className={cn(
@@ -90,6 +74,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     );
   }
 );
-Input.displayName = "Input";
+Textarea.displayName = "Textarea";
 
-export { Input };
+export { Textarea };
