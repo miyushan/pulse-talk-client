@@ -9,47 +9,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { gql, useMutation } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import { useRouter } from "next/navigation";
 import { BASE_ROUTES } from "@/constants";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { FormProvider, RHFInput } from "@/components/hook-forms";
 import { showToast } from "@/lib/showToast";
-
-const registerFormSchema = z.object({
-  firstName: z.string().min(2).max(30),
-  lastName: z.string().min(2).max(30),
-  userName: z.string().min(2).max(30),
-  email: z.string().email(),
-  password: z.string().min(8),
-  confirmPassword: z.string().min(8),
-});
-type RegisterFormSchema = z.infer<typeof registerFormSchema>;
-
-const registerUserMutation = gql`
-  mutation RegisterUser(
-    $email: String!
-    $firstName: String!
-    $lastName: String
-    $userName: String!
-    $password: String!
-  ) {
-    registerUser(
-      input: {
-        email: $email
-        firstName: $firstName
-        lastName: $lastName
-        password: $password
-        userName: $userName
-      }
-    ) {
-      message
-      success
-    }
-  }
-`;
+import { registerFormSchema, RegisterFormSchema } from "./schema";
+import { REGISTER_USER_MUTATION } from "@/graphql/mutations/registerUserMutation";
+import { handleRegisterError } from "@/lib/auth";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -65,37 +34,23 @@ export default function RegisterForm() {
       confirmPassword: "",
     },
   });
-  const { handleSubmit } = methods;
 
-  const [registerUser, { loading, error, data }] =
-    useMutation(registerUserMutation);
+  const [registerUser, { loading, error, data }] = useMutation(
+    REGISTER_USER_MUTATION
+  );
 
-  const callRegisterUser = async (values: RegisterFormSchema) => {
-    const { firstName, lastName, userName, email, password, confirmPassword } =
-      values;
+  const onSubmit = async (values: RegisterFormSchema) => {
+    try {
+      const { data } = await registerUser({ variables: values });
 
-    if (password !== confirmPassword) {
-      showToast("error", "Passwords do not match.");
-      return;
-    }
-
-    const res = await registerUser({
-      variables: { email, firstName, lastName, userName, password },
-    });
-
-    if (res?.data?.registerUser.success) {
-      showToast("success", "You have successfully registered.");
-      router.push(BASE_ROUTES.SIGN_IN);
-    }
-
-    if (!res?.data?.registerUser.success && res?.data?.registerUser.message) {
-      showToast("error", res?.data?.registerUser.message);
+      if (data?.registerUser?.success) {
+        showToast("success", "You have successfully registered.");
+        router.push(BASE_ROUTES.SIGN_IN);
+      }
+    } catch (error) {
+      showToast("error", handleRegisterError(error));
     }
   };
-
-  const onSubmit = handleSubmit((values: RegisterFormSchema) => {
-    callRegisterUser(values);
-  });
 
   return (
     <div className={cn("max-w-xl mx-auto flex flex-col gap-6")}>
@@ -107,7 +62,10 @@ export default function RegisterForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <FormProvider methods={methods} onSubmit={onSubmit}>
+          <FormProvider
+            methods={methods}
+            onSubmit={methods.handleSubmit(onSubmit)}
+          >
             <div className="flex flex-col gap-8 mt-2">
               <div className="grid grid-cols-2 gap-y-4 gap-x-6">
                 <RHFInput label="First name" name="firstName" />

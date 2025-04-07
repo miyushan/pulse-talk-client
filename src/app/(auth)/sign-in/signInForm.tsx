@@ -16,27 +16,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { FormProvider, RHFInput } from "@/components/hook-forms";
 import { showToast } from "@/lib/showToast";
-import { isApolloError } from "@/lib/isApolloError";
 import { LOGIN_USER_MUTATION } from "@/graphql/mutations/loginUserMutation";
 import { signInFormSchema, SignInFormSchema } from "./schema";
-
-const handleLoginError = (error: unknown) => {
-  console.error("Login error:", error);
-
-  if (isApolloError(error)) {
-    const graphQLError = error.graphQLErrors[0];
-    if (graphQLError?.extensions?.code === "UNAUTHENTICATED") {
-      return "Invalid email or password";
-    }
-    return graphQLError?.message || "Login failed";
-  }
-
-  if (error instanceof Error) {
-    return error.message || "Network error";
-  }
-
-  return "An unexpected error occurred";
-};
+import { handleLoginError } from "@/lib/auth";
 
 export default function SignInForm() {
   const router = useRouter();
@@ -59,8 +41,6 @@ export default function SignInForm() {
       if (data?.loginUser?.success) {
         showToast("success", "You have successfully logged in.");
         router.push(BASE_ROUTES.CHAT);
-      } else {
-        showToast("error", data?.loginUser?.message || "Login failed");
       }
     } catch (error) {
       showToast("error", handleLoginError(error));
