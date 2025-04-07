@@ -25,6 +25,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useRouter } from "next/navigation";
+import { gql, useMutation } from "@apollo/client";
+import { BASE_ROUTES } from "@/constants";
 
 export function NavUser({
   user,
@@ -35,7 +38,18 @@ export function NavUser({
     avatar: string;
   };
 }) {
+  const router = useRouter();
   const { isMobile } = useSidebar();
+
+  const logOutUserMutation = gql`
+    mutation LogOutUser {
+      logoutUser {
+        message
+      }
+    }
+  `;
+  const [logOutUser, { loading, error, data }] =
+    useMutation(logOutUserMutation);
 
   return (
     <SidebarMenu>
@@ -98,7 +112,12 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                logOutUser();
+                router.push(`${BASE_ROUTES.SIGN_IN}`);
+              }}
+            >
               <LogOut />
               Log out
             </DropdownMenuItem>

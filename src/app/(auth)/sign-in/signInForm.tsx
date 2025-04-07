@@ -12,26 +12,26 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { gql, useMutation } from "@apollo/client";
+import { useRouter } from "next/navigation";
+import { BASE_ROUTES } from "@/constants";
 
 export default function SignInForm() {
+  const router = useRouter();
+
   const logInUserMutation = gql`
     mutation LoginUser($email: String!, $password: String!) {
       loginUser(input: { email: $email, password: $password }) {
         message
+        success
       }
     }
   `;
 
-  // const logOutUserMutation = gql`
-  //   mutation LogOutUser {
-  //     logoutUser {
-  //       message
-  //     }
-  //   }
-  // `;
-
   const [loginUser, { loading, error, data }] = useMutation(logInUserMutation);
-  console.log("🚀 ~ data:", loading, data, error);
+
+  if (data?.loginUser?.success) {
+    router.push(`${BASE_ROUTES.CHAT}`);
+  }
 
   return (
     <div className={cn("flex flex-col gap-6")}>
@@ -71,20 +71,16 @@ export default function SignInForm() {
                 />
               </div>
               <Button
-                // type="submit"
+                type="button"
+                disabled={loading}
                 className="w-full"
-                onClick={async (e) => {
+                onClick={(e) => {
                   e.preventDefault();
                   const email = "kumar@gmail";
                   const password = "kumar";
-                  try {
-                    const res = await loginUser({
-                      variables: { email, password },
-                    });
-                    console.log("🚀 ~ res:", res);
-                  } catch (err) {
-                    console.error("Login error:", err);
-                  }
+                  loginUser({
+                    variables: { email, password },
+                  });
                 }}
               >
                 Login

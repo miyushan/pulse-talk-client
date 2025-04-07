@@ -14,11 +14,18 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { query } from "@/config/ApolloClient";
+import { ACCESS_TOKEN, BASE_ROUTES } from "@/constants";
 import { gql } from "@apollo/client";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export default async function ChatPage() {
   const cookieStore = await cookies();
+  const accessToken = cookieStore.get(ACCESS_TOKEN)?.value;
+
+  if (!accessToken) {
+    return redirect(`${BASE_ROUTES.SIGN_IN}`);
+  }
 
   const userQuery = gql`
     query SearchUsers($userName: String!) {
@@ -43,7 +50,6 @@ export default async function ChatPage() {
       },
     },
   });
-  console.log("🚀 ~ ChatPage ~ data:", data);
 
   return (
     <SidebarProvider
