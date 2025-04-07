@@ -16,7 +16,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { FormProvider, RHFInput } from "@/components/hook-forms";
-import { showToast } from "@/utils/showToast";
+import { showToast } from "@/lib/showToast";
 
 const registerFormSchema = z.object({
   firstName: z.string().min(2).max(30),

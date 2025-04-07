@@ -9,29 +9,34 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { gql, useMutation } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import { useRouter } from "next/navigation";
 import { BASE_ROUTES } from "@/constants";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { FormProvider, RHFInput } from "@/components/hook-forms";
-import { showToast } from "@/utils/showToast";
+import { showToast } from "@/lib/showToast";
+import { isApolloError } from "@/lib/isApolloError";
+import { LOGIN_USER_MUTATION } from "@/graphql/mutations/loginUserMutation";
+import { signInFormSchema, SignInFormSchema } from "./schema";
 
-const signInFormSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-});
-type SignInFormSchema = z.infer<typeof signInFormSchema>;
+const handleLoginError = (error: unknown) => {
+  console.error("Login error:", error);
 
-const logInUserMutation = gql`
-  mutation LoginUser($email: String!, $password: String!) {
-    loginUser(input: { email: $email, password: $password }) {
-      message
-      success
+  if (isApolloError(error)) {
+    const graphQLError = error.graphQLErrors[0];
+    if (graphQLError?.extensions?.code === "UNAUTHENTICATED") {
+      return "Invalid email or password";
     }
+    return graphQLError?.message || "Login failed";
   }
-`;
+
+  if (error instanceof Error) {
+    return error.message || "Network error";
+  }
+
+  return "An unexpected error occurred";
+};
 
 export default function SignInForm() {
   const router = useRouter();
@@ -43,29 +48,24 @@ export default function SignInForm() {
       password: "",
     },
   });
-  const { handleSubmit } = methods;
 
-  const [loginUser, { loading, error, data }] = useMutation(logInUserMutation);
+  const [loginUser, { loading, error, data }] =
+    useMutation(LOGIN_USER_MUTATION);
 
-  const callLoginUser = async (values: SignInFormSchema) => {
-    const { email, password } = values;
-    const res = await loginUser({
-      variables: { email, password },
-    });
+  const onSubmit = async (values: SignInFormSchema) => {
+    try {
+      const { data } = await loginUser({ variables: values });
 
-    if (res?.data?.loginUser.success) {
-      showToast("success", "You have successfully logged in.");
-      router.push(BASE_ROUTES.CHAT);
-    }
-
-    if (!res?.data?.loginUser.success && res?.data?.loginUser.message) {
-      showToast("error", res?.data?.loginUser.message);
+      if (data?.loginUser?.success) {
+        showToast("success", "You have successfully logged in.");
+        router.push(BASE_ROUTES.CHAT);
+      } else {
+        showToast("error", data?.loginUser?.message || "Login failed");
+      }
+    } catch (error) {
+      showToast("error", handleLoginError(error));
     }
   };
-
-  const onSubmit = handleSubmit((values: SignInFormSchema) => {
-    callLoginUser(values);
-  });
 
   return (
     <div className={cn("max-w-md mx-auto flex flex-col gap-6")}>
@@ -77,7 +77,10 @@ export default function SignInForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <FormProvider methods={methods} onSubmit={onSubmit}>
+          <FormProvider
+            methods={methods}
+            onSubmit={methods.handleSubmit(onSubmit)}
+          >
             <div className="flex flex-col gap-8 mt-2">
               <div className="flex flex-col space-y-4">
                 <RHFInput label="Email address" name="email" type="email" />
