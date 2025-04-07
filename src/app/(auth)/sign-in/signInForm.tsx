@@ -9,8 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { gql, useMutation } from "@apollo/client";
 import { useRouter } from "next/navigation";
 import { BASE_ROUTES } from "@/constants";
@@ -18,6 +16,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { FormProvider, RHFInput } from "@/components/hook-forms";
+import { showToast } from "@/utils/showToast";
 
 const signInFormSchema = z.object({
   email: z.string().email(),
@@ -55,7 +54,12 @@ export default function SignInForm() {
     });
 
     if (res?.data?.loginUser.success) {
+      showToast("success", "You have successfully logged in.");
       router.push(BASE_ROUTES.CHAT);
+    }
+
+    if (!res?.data?.loginUser.success && res?.data?.loginUser.message) {
+      showToast("error", res?.data?.loginUser.message);
     }
   };
 
