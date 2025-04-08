@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 
 export const GET_CHATROOMS_FOR_USER = gql`
-  query GetChatRoomsForUser($userId: Float!) {
+  query getChatRoomsForUser($userId: Float!) {
     getChatRoomsForUser(userId: $userId) {
       id
       name
@@ -11,13 +11,12 @@ export const GET_CHATROOMS_FOR_USER = gql`
         createdAt
         user {
           id
-          fullname
+          userName
         }
       }
       users {
         id
-        fullname
-        email
+        userName
       }
     }
   }

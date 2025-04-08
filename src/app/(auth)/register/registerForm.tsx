@@ -19,6 +19,7 @@ import { showToast } from "@/lib/showToast";
 import { registerFormSchema, RegisterFormSchema } from "./schema";
 import { REGISTER_USER_MUTATION } from "@/graphql/mutations/registerUserMutation";
 import { handleRegisterError } from "@/lib/auth";
+import { capitalize } from "@/lib/capitalize";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -40,8 +41,19 @@ export default function RegisterForm() {
   );
 
   const onSubmit = async (values: RegisterFormSchema) => {
+    if (values.password !== values.confirmPassword)
+      return showToast("error", "Passwords do not match.");
+
     try {
-      const { data } = await registerUser({ variables: values });
+      const { data } = await registerUser({
+        variables: {
+          email: values.email,
+          firstName: capitalize(values.firstName),
+          lastName: capitalize(values.lastName),
+          userName: capitalize(values.userName),
+          password: values.password,
+        },
+      });
 
       if (data?.registerUser?.success) {
         showToast("success", "You have successfully registered.");

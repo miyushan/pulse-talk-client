@@ -1,23 +1,11 @@
 import { AppSidebar } from "@/components/app-sidebar";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { query } from "@/config/ApolloClient";
 import { ACCESS_TOKEN, BASE_ROUTES } from "@/constants";
 import { gql } from "@apollo/client";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { ChatWindow } from "./chatWindow";
 
 export default async function ChatPage() {
   const cookieStore = await cookies();
@@ -60,7 +48,9 @@ export default async function ChatPage() {
       }
     >
       <AppSidebar />
-      <SidebarInset>hello</SidebarInset>
+      <SidebarInset>
+        <ChatWindow />
+      </SidebarInset>
     </SidebarProvider>
   );
 }
