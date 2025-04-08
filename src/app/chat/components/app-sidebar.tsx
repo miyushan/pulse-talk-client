@@ -1,7 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { ArchiveX, Command, File, Inbox, Send, Trash2 } from "lucide-react";
+import {
+  ArchiveX,
+  Check,
+  ChevronsUpDown,
+  File,
+  Inbox,
+  Send,
+  Trash2,
+} from "lucide-react";
 import { NavUser } from "@/app/chat/components/nav-user";
 import {
   Sidebar,
@@ -28,6 +36,22 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import useDebounce from "@/hooks/useDebounce";
 import { SEARCH_USERS } from "@/graphql/queries";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { cn } from "@/lib/utils";
+import { User } from "../chatWindow";
 
 export const AppSidebar = ({
   ...props
@@ -52,87 +76,115 @@ export const AppSidebar = ({
     variables: { input: { userName: debouncedSearchTerm } },
   });
 
+  const [openPopover, setOpenPopover] = useState(false);
+
   return (
-    <Sidebar
-      collapsible="icon"
-      className="overflow-hidden [&>[data-sidebar=sidebar]]:flex-row"
-      {...props}
-    >
+    <>
       <Sidebar
-        collapsible="none"
-        className="!w-[calc(var(--sidebar-width-icon)_+_1px)] border-r"
+        collapsible="icon"
+        className="overflow-hidden [&>[data-sidebar=sidebar]]:flex-row"
+        {...props}
       >
-        <SidebarHeader>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton size="lg" asChild className="md:h-8 md:p-0">
-                <a href="#">
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                    <Command className="size-4" />
-                  </div>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">Pulse Talk</span>
-                    <span className="truncate text-xs">Chat</span>
-                  </div>
-                </a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarHeader>
-        <SidebarContent></SidebarContent>
-        <SidebarFooter>
-          <NavUser />
-        </SidebarFooter>
-      </Sidebar>
-
-      <Sidebar collapsible="none" className="hidden bg-white flex-1 md:flex">
-        <SidebarHeader className="gap-3.5 border-b p-4">
-          <div className=" text-xl font-bold text-foreground">Pulse Talk</div>
-
-          <SidebarInput
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search..."
-          />
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarGroup className="px-0">
-            <SidebarGroupContent>
-              {chats?.getChatRoomsForUser?.length ? (
-                chats?.getChatRoomsForUser?.map((chat: any) => (
-                  <div
-                    key={chat.id}
-                    className={`p-4 border-b flex items-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                      chat.id === 1 ? "bg-blue-50 dark:bg-blue-900" : ""
-                    }`}
-                    onClick={() => selectChatRoom(+chat.id, chat.name)}
-                  >
-                    <Avatar className="h-10 w-10">
-                      <AvatarFallback>
-                        {getFirstTwoChars(chat.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="w-full ml-3">
-                      <div className="flex justify-between items-center">
-                        <h3 className="font-medium">{chat.name}</h3>
-                        <span className="text-xs text-gray-500">2:30 PM</span>
-                      </div>
-                      <p className="text-sm text-gray-500 truncate">
-                        Last message preview...
-                      </p>
+        <Sidebar
+          collapsible="none"
+          className="!w-[calc(var(--sidebar-width-icon)_+_1px)] border-r"
+        >
+          <SidebarHeader>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton size="lg" asChild className="md:h-8 md:p-0">
+                  <a href="#">
+                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                      <Command className="size-4" />
                     </div>
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                      <span className="truncate font-semibold">Pulse Talk</span>
+                      <span className="truncate text-xs">Chat</span>
+                    </div>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarHeader>
+          <SidebarContent></SidebarContent>
+          <SidebarFooter>
+            <NavUser />
+          </SidebarFooter>
+        </Sidebar>
+
+        <Sidebar collapsible="none" className="hidden bg-white flex-1 md:flex">
+          <SidebarHeader className="gap-3.5 border-b p-4">
+            <div className=" text-xl font-bold text-foreground">Pulse Talk</div>
+
+            <SidebarInput
+              onClick={(e) => setOpenPopover(true)}
+              placeholder="Search..."
+            />
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarGroup className="px-0">
+              <SidebarGroupContent>
+                {chats?.getChatRoomsForUser?.length ? (
+                  chats?.getChatRoomsForUser?.map((chat: any) => (
+                    <div
+                      key={chat.id}
+                      className={`p-4 border-b flex items-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                        chat.id === 1 ? "bg-blue-50 dark:bg-blue-900" : ""
+                      }`}
+                      onClick={() => selectChatRoom(+chat.id, chat.name)}
+                    >
+                      <Avatar className="h-10 w-10">
+                        <AvatarFallback>
+                          {getFirstTwoChars(chat.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="w-full ml-3">
+                        <div className="flex justify-between items-center">
+                          <h3 className="font-medium">{chat.name}</h3>
+                          <span className="text-xs text-gray-500">2:30 PM</span>
+                        </div>
+                        <p className="text-sm text-gray-500 truncate">
+                          Last message preview...
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex flex-col gap-2 mt-2">
+                    <Skeleton className="h-[40px] rounded-xl mx-4" />
+                    <Skeleton className="h-[40px] rounded-xl mx-4" />
                   </div>
-                ))
-              ) : (
-                <div className="flex flex-col gap-2 mt-2">
-                  <Skeleton className="h-[40px] rounded-xl mx-4" />
-                  <Skeleton className="h-[40px] rounded-xl mx-4" />
-                </div>
-              )}
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
+                )}
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
+        </Sidebar>
       </Sidebar>
-    </Sidebar>
+
+      <Popover open={openPopover} onOpenChange={setOpenPopover}>
+        <PopoverContent className="w-[200px] p-0">
+          <Command>
+            <CommandInput placeholder="Search framework..." />
+            <CommandList>
+              <CommandEmpty>No framework found.</CommandEmpty>
+              <CommandGroup>
+                {users?.searchUsers?.map((user: User) => (
+                  <CommandItem
+                    key={user.id}
+                    value={`${user.id}`}
+                    onSelect={(currentValue) => {
+                      setOpenPopover(false);
+                    }}
+                  >
+                    <Check />
+                    {user.userName}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    </>
   );
 };
