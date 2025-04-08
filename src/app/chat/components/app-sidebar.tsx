@@ -17,7 +17,11 @@ import {
 } from "@/components/ui/sidebar";
 import { useQuery } from "@apollo/client";
 import { GET_CHATROOMS_FOR_USER } from "@/graphql/queries/getChatroomsForUser";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "../../../components/ui/avatar";
 import { getFirstTwoChars } from "@/lib/getFirstTwoChars";
 
 export const AppSidebar = ({
@@ -29,7 +33,7 @@ export const AppSidebar = ({
     error,
   } = useQuery(GET_CHATROOMS_FOR_USER, {
     variables: {
-      userId: 17,
+      userId: 21,
     },
   });
   console.log("🚀 ~ chats:", chats?.getChatRoomsForUser);

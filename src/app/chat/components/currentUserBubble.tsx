@@ -5,7 +5,7 @@ import { formatDateTime } from "@/lib/formatDateTime";
 
 export const CurrentUserBubble = ({ msg }: { msg: Message }) => {
   return (
-    <div key={msg.id} className="flex items-start gap-3 mb-2">
+    <div key={msg.id} className="flex items-start gap-3 my-2">
       <Avatar className="h-7 w-7 mt-1 ">
         <AvatarFallback className="text-xs font-medium bg-slate-200">
           {getFirstTwoChars(msg.user.userName)}

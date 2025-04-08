@@ -1,4 +1,4 @@
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/app/chat/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { query } from "@/config/ApolloClient";
 import { ACCESS_TOKEN, BASE_ROUTES } from "@/constants";

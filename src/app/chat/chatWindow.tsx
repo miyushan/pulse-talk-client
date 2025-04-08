@@ -34,7 +34,7 @@ import { OtherUserBubble } from "./components/otherUserBubble";
 import { CurrentUserBubble } from "./components/currentUserBubble";
 
 const CHATROOM_ID = 1; // TODO: Need to be dynamic
-const CURRENT_USER_ID = 17; // TODO: Need to be dynamic
+const CURRENT_USER_ID = 21; // TODO: Need to be dynamic
 
 export type User = {
   id: number;
@@ -258,7 +258,7 @@ export function ChatWindow() {
             placeholder="Type your message..."
             className="flex-1"
             classNames={{
-              input: "h-12",
+              input: "h-12 bg-slate-100",
             }}
           />
 
