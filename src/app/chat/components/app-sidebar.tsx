@@ -23,13 +23,15 @@ import {
   AvatarImage,
 } from "../../../components/ui/avatar";
 import { getFirstTwoChars } from "@/lib/getFirstTwoChars";
-import { useAppStore } from "@/providers/storeProvider";
+import usePersistStore from "@/hooks/usePersistStore";
+import { useAppStore } from "@/store/appStore";
 
 export const AppSidebar = ({
   ...props
 }: React.ComponentProps<typeof Sidebar>) => {
-  const { userId } = useAppStore((state) => state);
-  console.log("🚀 ~ userId:", userId);
+  const store = usePersistStore(useAppStore, (state) => state);
+
+  console.log("🚀 ~ userId:", store?.userId);
 
   const {
     data: chats,
@@ -37,9 +39,13 @@ export const AppSidebar = ({
     error,
   } = useQuery(GET_CHATROOMS_FOR_USER, {
     variables: {
-      userId: userId,
+      userId: store?.userId,
     },
   });
+
+  if (!store) {
+    return null;
+  }
 
   return (
     <Sidebar

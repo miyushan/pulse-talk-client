@@ -1,4 +1,5 @@
-import { createStore } from "zustand/vanilla";
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 export type AppState = {
   userId: number;
@@ -15,32 +16,22 @@ export type AppActions = {
   resetSelectedChatRoom: () => void;
 };
 
-export type AppStore = AppState & AppActions;
-
-export const defaultInitState: AppStore = {
-  userId: 0,
-  userName: "",
-  userEmail: "",
-  selectedChatRoomId: 0,
-  selectedChatRoomName: "",
-  selectUser: () => {},
-  selectChatRoom: () => {},
-  resetUser: () => {},
-  resetSelectedChatRoom: () => {},
-};
-
-export const createAppStore = (initState: AppState = defaultInitState) => {
-  return createStore<AppStore>()((set) => ({
-    ...initState,
-    selectUser: (userId: number, userName: string, userEmail: string) =>
-      set({ userId, userName, userEmail }),
-    selectChatRoom: (chatRoomId: number, chatRoomName: string) =>
-      set({
-        selectedChatRoomId: chatRoomId,
-        selectedChatRoomName: chatRoomName,
-      }),
-    resetUser: () => set({ userId: 0, userName: "", userEmail: "" }),
-    resetSelectedChatRoom: () =>
-      set({ selectedChatRoomId: 0, selectedChatRoomName: "" }),
-  }));
-};
+export const useAppStore = create(
+  persist<AppState & AppActions>(
+    (set) => ({
+      userId: 0,
+      userName: "",
+      userEmail: "",
+      selectedChatRoomId: 0,
+      selectedChatRoomName: "",
+      selectUser: () => {},
+      selectChatRoom: () => {},
+      resetUser: () => {},
+      resetSelectedChatRoom: () => {},
+    }),
+    {
+      name: "appStore",
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);

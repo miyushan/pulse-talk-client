@@ -19,12 +19,12 @@ import { showToast } from "@/lib/showToast";
 import { LOGIN_USER_MUTATION } from "@/graphql/mutations/loginUserMutation";
 import { signInFormSchema, SignInFormSchema } from "./schema";
 import { handleLoginError } from "@/lib/auth";
-import { useStore } from "zustand";
-import { useAppStore } from "@/providers/storeProvider";
+import usePersistStore from "@/hooks/usePersistStore";
+import { useAppStore } from "@/store/appStore";
 
 export default function SignInForm() {
   const router = useRouter();
-  const { selectUser } = useAppStore((state) => state);
+  const store = usePersistStore(useAppStore, (state) => state);
 
   const methods = useForm<SignInFormSchema>({
     resolver: zodResolver(signInFormSchema),
@@ -40,10 +40,12 @@ export default function SignInForm() {
   const onSubmit = async (values: SignInFormSchema) => {
     try {
       const { data } = await loginUser({ variables: values });
+      console.log("🚀 ~ onSubmit ~ data:", data);
 
-      if (data?.loginUser?.success) {
+      if (data?.loginUser?.success && data.loginUser.user.id) {
         showToast("success", "You have successfully logged in.");
-        selectUser(
+        console.log("🚀 ~ onSubmit ~ data2:", data);
+        store?.selectUser(
           data.loginUser.user.id,
           data.loginUser.user.userName,
           data.loginUser.user.email

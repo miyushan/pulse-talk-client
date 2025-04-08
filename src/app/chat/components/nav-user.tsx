@@ -28,14 +28,13 @@ import {
 import { useRouter } from "next/navigation";
 import { gql, useMutation } from "@apollo/client";
 import { BASE_ROUTES } from "@/constants";
-import { useAppStore } from "@/providers/storeProvider";
 import { getFirstTwoChars } from "@/lib/getFirstTwoChars";
+import usePersistStore from "@/hooks/usePersistStore";
+import { useAppStore } from "@/store/appStore";
 
 export function NavUser() {
   const router = useRouter();
-  const { userName, userEmail, resetUser, resetSelectedChatRoom } = useAppStore(
-    (state) => state
-  );
+  const store = usePersistStore(useAppStore, (state) => state);
 
   const { isMobile } = useSidebar();
 
@@ -49,6 +48,10 @@ export function NavUser() {
   const [logOutUser, { loading, error, data }] =
     useMutation(logOutUserMutation);
 
+  if (!store) {
+    return null;
+  }
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -60,12 +63,14 @@ export function NavUser() {
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarFallback className="rounded-lg">
-                  {getFirstTwoChars(userName)}
+                  {getFirstTwoChars(store?.userName)}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{userName}</span>
-                <span className="truncate text-xs">{userEmail}</span>
+                <span className="truncate font-semibold">
+                  {store?.userName}
+                </span>
+                <span className="truncate text-xs">{store?.userEmail}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -80,12 +85,14 @@ export function NavUser() {
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm cursor-pointer">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarFallback className="rounded-lg">
-                    {getFirstTwoChars(userName)}
+                    {getFirstTwoChars(store?.userName)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{userName}</span>
-                  <span className="truncate text-xs">{userEmail}</span>
+                  <span className="truncate font-semibold">
+                    {store?.userName}
+                  </span>
+                  <span className="truncate text-xs">{store?.userEmail}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
@@ -94,8 +101,8 @@ export function NavUser() {
               className="cursor-pointer"
               onClick={() => {
                 logOutUser();
-                resetUser();
-                resetSelectedChatRoom();
+                store.resetUser();
+                store.resetSelectedChatRoom();
                 router.push(`${BASE_ROUTES.SIGN_IN}`);
               }}
             >
