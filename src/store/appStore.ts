@@ -16,18 +16,23 @@ export type AppActions = {
   resetSelectedChatRoom: () => void;
 };
 
-export const useAppStore = create(
-  persist<AppState & AppActions>(
-    (set) => ({
+export const useAppStore = create<AppState & AppActions>()(
+  persist(
+    (set, get) => ({
       userId: 0,
       userName: "",
       userEmail: "",
       selectedChatRoomId: 0,
       selectedChatRoomName: "",
-      selectUser: () => {},
-      selectChatRoom: () => {},
-      resetUser: () => {},
-      resetSelectedChatRoom: () => {},
+      selectUser: (userId: number, userName: string, userEmail: string) =>
+        set({ userId, userName, userEmail }),
+      selectChatRoom: (chatRoomId: number, chatRoomName: string) =>
+        set({
+          selectedChatRoomId: chatRoomId,
+          selectedChatRoomName: chatRoomName,
+        }),
+      resetUser: () => set({ userId: 0, userName: "", userEmail: "" }),
+      resetSelectedChatRoom: () => set({ selectedChatRoomId: 0 }),
     }),
     {
       name: "appStore",
