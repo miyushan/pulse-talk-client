@@ -5,7 +5,7 @@ import { useMutation, useQuery, useSubscription } from "@apollo/client";
 import { useParams } from "next/navigation";
 import { PaperclipIcon, SendHorizonalIcon, SmileIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/useMobile";
 import {
   USER_STARTED_TYPING_MUTATION,
   USER_STOPPED_TYPING_MUTATION,
@@ -32,6 +32,7 @@ import { getFirstTwoChars } from "@/lib/getFirstTwoChars";
 import { OtherUserBubble } from "./components/otherUserBubble";
 import { CurrentUserBubble } from "./components/currentUserBubble";
 import { useAppStore } from "@/store/appStore";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export type User = {
   id: number;
@@ -208,11 +209,24 @@ export function ChatWindow() {
     }
   }, [stoppedTypingData]);
 
-  if (!selectedChatRoomId) {
-    return null;
+  if (selectedChatRoomId === 0) {
+    return (
+      <div className="flex flex-col gap-2 h-screen justify-center items-center">
+        Please select a chat.
+      </div>
+    );
+  }
+  if (messagesLoading) {
+    return (
+      <div className="flex flex-col gap-2 h-screen justify-center items-center">
+        <Skeleton className="w-[300px] h-[20px] rounded-xl mx-4" />
+        <Skeleton className="w-[300px] h-[20px] rounded-xl mx-4" />
+      </div>
+    );
   }
 
   if (!isUserInChatroom) return null;
+  if (messages?.length === 0) return null;
 
   const totalUsers = chatroomUsersData?.getUsersOfChatroom.length || 0;
   const onlineUsers = liveUsersData?.liveUsersInChatroom.length || 0;
@@ -252,7 +266,10 @@ export function ChatWindow() {
         <div className="flex-1 overflow-hidden">
           <ScrollArea className="h-full flex-1 px-6 space-y-4">
             {messages?.map((msg) => {
-              const isSentByCurrentUser = msg.user.id === userId;
+              if (msg.user.id === null) {
+                console.log("🚀 ~ {messages?.map ~ msg:", msg);
+              }
+              const isSentByCurrentUser = +msg.user.id === userId;
               if (!isSentByCurrentUser) {
                 return <CurrentUserBubble key={msg.id} msg={msg} />;
               }

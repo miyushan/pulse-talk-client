@@ -24,11 +24,17 @@ import {
 } from "../../../components/ui/avatar";
 import { getFirstTwoChars } from "@/lib/getFirstTwoChars";
 import { useAppStore } from "@/store/appStore";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from "react";
+import useDebounce from "@/hooks/useDebounce";
+import { SEARCH_USERS } from "@/graphql/queries";
 
 export const AppSidebar = ({
   ...props
 }: React.ComponentProps<typeof Sidebar>) => {
   const { userId, selectChatRoom } = useAppStore((state) => state);
+
+  const [search, setSearch] = useState("");
 
   const {
     data: chats,
@@ -38,6 +44,12 @@ export const AppSidebar = ({
     variables: {
       userId,
     },
+  });
+
+  const debouncedSearchTerm = useDebounce(search, 500);
+
+  const { data: users } = useQuery(SEARCH_USERS, {
+    variables: { input: { userName: debouncedSearchTerm } },
   });
 
   return (
@@ -77,35 +89,46 @@ export const AppSidebar = ({
         <SidebarHeader className="gap-3.5 border-b p-4">
           <div className=" text-xl font-bold text-foreground">Pulse Talk</div>
 
-          <SidebarInput placeholder="Search..." />
+          <SidebarInput
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search..."
+          />
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup className="px-0">
             <SidebarGroupContent>
-              {chats?.getChatRoomsForUser?.map((chat: any) => (
-                <div
-                  key={chat.id}
-                  className={`p-4 border-b flex items-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                    chat.id === 1 ? "bg-blue-50 dark:bg-blue-900" : ""
-                  }`}
-                  onClick={() => selectChatRoom(+chat.id, chat.name)}
-                >
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback>
-                      {getFirstTwoChars(chat.name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="w-full ml-3">
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-medium">{chat.name}</h3>
-                      <span className="text-xs text-gray-500">2:30 PM</span>
+              {chats?.getChatRoomsForUser?.length ? (
+                chats?.getChatRoomsForUser?.map((chat: any) => (
+                  <div
+                    key={chat.id}
+                    className={`p-4 border-b flex items-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                      chat.id === 1 ? "bg-blue-50 dark:bg-blue-900" : ""
+                    }`}
+                    onClick={() => selectChatRoom(+chat.id, chat.name)}
+                  >
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback>
+                        {getFirstTwoChars(chat.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="w-full ml-3">
+                      <div className="flex justify-between items-center">
+                        <h3 className="font-medium">{chat.name}</h3>
+                        <span className="text-xs text-gray-500">2:30 PM</span>
+                      </div>
+                      <p className="text-sm text-gray-500 truncate">
+                        Last message preview...
+                      </p>
                     </div>
-                    <p className="text-sm text-gray-500 truncate">
-                      Last message preview...
-                    </p>
                   </div>
+                ))
+              ) : (
+                <div className="flex flex-col gap-2 mt-2">
+                  <Skeleton className="h-[40px] rounded-xl mx-4" />
+                  <Skeleton className="h-[40px] rounded-xl mx-4" />
                 </div>
-              ))}
+              )}
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
