@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { ArchiveX, Command, File, Inbox, Send, Trash2 } from "lucide-react";
-import { NavUser } from "@/components/nav-user";
+import { NavUser } from "@/app/chat/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -23,20 +23,23 @@ import {
   AvatarImage,
 } from "../../../components/ui/avatar";
 import { getFirstTwoChars } from "@/lib/getFirstTwoChars";
+import { useAppStore } from "@/providers/storeProvider";
 
 export const AppSidebar = ({
   ...props
 }: React.ComponentProps<typeof Sidebar>) => {
+  const { userId } = useAppStore((state) => state);
+  console.log("🚀 ~ userId:", userId);
+
   const {
     data: chats,
     loading,
     error,
   } = useQuery(GET_CHATROOMS_FOR_USER, {
     variables: {
-      userId: 21,
+      userId: userId,
     },
   });
-  console.log("🚀 ~ chats:", chats?.getChatRoomsForUser);
 
   return (
     <Sidebar
@@ -67,13 +70,7 @@ export const AppSidebar = ({
         </SidebarHeader>
         <SidebarContent></SidebarContent>
         <SidebarFooter>
-          <NavUser
-            user={{
-              name: "John Doe",
-              email: "tH3e9@example.com",
-              avatar: "",
-            }}
-          />
+          <NavUser />
         </SidebarFooter>
       </Sidebar>
 

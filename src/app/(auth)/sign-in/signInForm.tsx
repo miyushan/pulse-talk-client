@@ -19,9 +19,12 @@ import { showToast } from "@/lib/showToast";
 import { LOGIN_USER_MUTATION } from "@/graphql/mutations/loginUserMutation";
 import { signInFormSchema, SignInFormSchema } from "./schema";
 import { handleLoginError } from "@/lib/auth";
+import { useStore } from "zustand";
+import { useAppStore } from "@/providers/storeProvider";
 
 export default function SignInForm() {
   const router = useRouter();
+  const { selectUser } = useAppStore((state) => state);
 
   const methods = useForm<SignInFormSchema>({
     resolver: zodResolver(signInFormSchema),
@@ -40,6 +43,11 @@ export default function SignInForm() {
 
       if (data?.loginUser?.success) {
         showToast("success", "You have successfully logged in.");
+        selectUser(
+          data.loginUser.user.id,
+          data.loginUser.user.userName,
+          data.loginUser.user.email
+        );
         router.push(BASE_ROUTES.CHAT);
       }
     } catch (error) {

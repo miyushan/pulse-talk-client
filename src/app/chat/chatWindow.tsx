@@ -34,7 +34,7 @@ import { OtherUserBubble } from "./components/otherUserBubble";
 import { CurrentUserBubble } from "./components/currentUserBubble";
 
 const CHATROOM_ID = 1; // TODO: Need to be dynamic
-const CURRENT_USER_ID = 21; // TODO: Need to be dynamic
+const CURRENT_USER_ID = 17; // TODO: Need to be dynamic
 
 export type User = {
   id: number;
@@ -205,6 +205,8 @@ export function ChatWindow() {
   const totalUsers = chatroomUsersData?.getUsersOfChatroom.length || 0;
   const onlineUsers = liveUsersData?.liveUsersInChatroom.length || 0;
 
+  return null;
+
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       <div className="flex-1 flex flex-col h-full">
@@ -239,7 +241,7 @@ export function ChatWindow() {
         {/* Messages */}
         <div className="flex-1 overflow-hidden">
           <ScrollArea className="h-full flex-1 px-6 space-y-4">
-            {messages.map((msg) => {
+            {messages?.map((msg) => {
               const isSentByCurrentUser = msg.user.id === CURRENT_USER_ID;
               if (!isSentByCurrentUser) {
                 return <CurrentUserBubble key={msg.id} msg={msg} />;
