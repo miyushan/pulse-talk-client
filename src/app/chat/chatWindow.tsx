@@ -226,7 +226,6 @@ export function ChatWindow() {
   }
 
   if (!isUserInChatroom) return null;
-  if (messages?.length === 0) return null;
 
   const totalUsers = chatroomUsersData?.getUsersOfChatroom.length || 0;
   const onlineUsers = liveUsersData?.liveUsersInChatroom.length || 0;
