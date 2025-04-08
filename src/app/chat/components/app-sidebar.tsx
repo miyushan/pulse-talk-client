@@ -5,6 +5,7 @@ import {
   ArchiveX,
   Check,
   ChevronsUpDown,
+  CirclePlusIcon,
   File,
   Inbox,
   Send,
@@ -23,7 +24,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import { GET_CHATROOMS_FOR_USER } from "@/graphql/queries/getChatroomsForUser";
 import {
   Avatar,
@@ -50,15 +51,28 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { cn } from "@/lib/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { User } from "../chatWindow";
+import { ADD_USERS_TO_CHATROOM, CREATE_CHATROOM } from "@/graphql/mutations";
 
 export const AppSidebar = ({
   ...props
 }: React.ComponentProps<typeof Sidebar>) => {
-  const { userId, selectChatRoom } = useAppStore((state) => state);
+  const { userId, selectChatRoom, selectedChatRoomId } = useAppStore(
+    (state) => state
+  );
 
   const [search, setSearch] = useState("");
+  const [newChatName, setNewChatName] = useState("");
 
   const {
     data: chats,
@@ -76,7 +90,11 @@ export const AppSidebar = ({
     variables: { input: { userName: debouncedSearchTerm } },
   });
 
+  const [enterChatroom] = useMutation(ADD_USERS_TO_CHATROOM);
+  const [createChatroom] = useMutation(CREATE_CHATROOM);
+
   const [openPopover, setOpenPopover] = useState(false);
+  const [openCreateGroup, setCreateGroup] = useState(false);
 
   return (
     <>
@@ -98,7 +116,6 @@ export const AppSidebar = ({
                       <Command className="size-4" />
                     </div>
                     <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">Pulse Talk</span>
                       <span className="truncate text-xs">Chat</span>
                     </div>
                   </a>
@@ -114,12 +131,57 @@ export const AppSidebar = ({
 
         <Sidebar collapsible="none" className="hidden bg-white flex-1 md:flex">
           <SidebarHeader className="gap-3.5 border-b p-4">
-            <div className=" text-xl font-bold text-foreground">Pulse Talk</div>
+            <div className="flex flex-1 space-between">
+              <div className="text-xl flex-1 font-bold text-foreground">
+                Pulse Talk
+              </div>
 
-            <SidebarInput
-              onClick={(e) => setOpenPopover(true)}
-              placeholder="Search..."
-            />
+              <Button
+                onClick={() => setCreateGroup(true)}
+                size="icon"
+                className="h-8 w-8"
+              >
+                <CirclePlusIcon className="h-5 w-5" />
+              </Button>
+            </div>
+
+            <Popover open={openPopover} onOpenChange={setOpenPopover}>
+              <PopoverTrigger asChild>
+                <SidebarInput placeholder="Search..." />
+              </PopoverTrigger>
+              <PopoverContent className="w-[200px] p-0">
+                <Command>
+                  <SidebarInput
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search..."
+                  />
+                  <CommandList>
+                    <CommandEmpty>No framework found.</CommandEmpty>
+                    <CommandGroup>
+                      {users?.searchUsers?.map((user: User) => (
+                        <CommandItem
+                          key={user.id}
+                          value={`${user.id}`}
+                          onSelect={async (currentValue) => {
+                            setOpenPopover(false);
+                            await enterChatroom({
+                              variables: {
+                                chatRoomId: selectedChatRoomId,
+                                userIds: [user.id],
+                              },
+                            });
+                          }}
+                        >
+                          <Check className="opacity-0" />
+                          {user.userName}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </SidebarHeader>
           <SidebarContent>
             <SidebarGroup className="px-0">
@@ -161,30 +223,33 @@ export const AppSidebar = ({
         </Sidebar>
       </Sidebar>
 
-      <Popover open={openPopover} onOpenChange={setOpenPopover}>
-        <PopoverContent className="w-[200px] p-0">
-          <Command>
-            <CommandInput placeholder="Search framework..." />
-            <CommandList>
-              <CommandEmpty>No framework found.</CommandEmpty>
-              <CommandGroup>
-                {users?.searchUsers?.map((user: User) => (
-                  <CommandItem
-                    key={user.id}
-                    value={`${user.id}`}
-                    onSelect={(currentValue) => {
-                      setOpenPopover(false);
-                    }}
-                  >
-                    <Check />
-                    {user.userName}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+      <AlertDialog open={openCreateGroup} onOpenChange={() => setCreateGroup}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Chat Group Name</AlertDialogTitle>
+            <SidebarInput
+              value={newChatName}
+              onChange={(e) => setNewChatName(e.target.value)}
+              placeholder="Search..."
+            />
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                await createChatroom({
+                  variables: {
+                    name: newChatName,
+                  },
+                });
+                setCreateGroup(false);
+              }}
+            >
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
