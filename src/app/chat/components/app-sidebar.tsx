@@ -28,7 +28,7 @@ import { useAppStore } from "@/store/appStore";
 export const AppSidebar = ({
   ...props
 }: React.ComponentProps<typeof Sidebar>) => {
-  const { userId } = useAppStore((state) => state);
+  const { userId, selectChatRoom } = useAppStore((state) => state);
 
   const {
     data: chats,
@@ -88,6 +88,7 @@ export const AppSidebar = ({
                   className={`p-4 border-b flex items-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${
                     chat.id === 1 ? "bg-blue-50 dark:bg-blue-900" : ""
                   }`}
+                  onClick={() => selectChatRoom(+chat.id, chat.name)}
                 >
                   <Avatar className="h-10 w-10">
                     <AvatarFallback>
