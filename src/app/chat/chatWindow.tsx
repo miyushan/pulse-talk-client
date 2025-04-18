@@ -265,10 +265,10 @@ export function ChatWindow() {
         <div className="flex-1 overflow-hidden">
           <ScrollArea className="h-full flex-1 px-6 space-y-4">
             {messages?.map((msg) => {
-              if (msg.user.id === null) {
-                console.log("🚀 ~ {messages?.map ~ msg:", msg);
-              }
-              const isSentByCurrentUser = +msg.user.id === userId;
+              console.log("🚀 ~ {messages?.map ~ msg:", msg);
+
+              if (!msg.user) return null;
+              const isSentByCurrentUser = msg.user.id === userId;
               if (!isSentByCurrentUser) {
                 return <CurrentUserBubble key={msg.id} msg={msg} />;
               }
