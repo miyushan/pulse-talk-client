@@ -20,9 +20,17 @@ import { registerFormSchema, RegisterFormSchema } from "./schema";
 import { REGISTER_USER_MUTATION } from "@/graphql/mutations/registerUserMutation";
 import { handleRegisterError } from "@/lib/auth";
 import { capitalize } from "@/lib/capitalize";
+import { useAppStore } from "@/store/appStore";
+import { useEffect } from "react";
 
 export default function RegisterForm() {
   const router = useRouter();
+  const { resetUser, resetSelectedChatRoom } = useAppStore((state) => state);
+
+  useEffect(() => {
+    resetUser();
+    resetSelectedChatRoom();
+  }, [resetUser, resetSelectedChatRoom]);
 
   const methods = useForm<RegisterFormSchema>({
     resolver: zodResolver(registerFormSchema),

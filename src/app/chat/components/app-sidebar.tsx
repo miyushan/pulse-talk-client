@@ -157,7 +157,7 @@ export const AppSidebar = ({
                     placeholder="Search..."
                   />
                   <CommandList>
-                    <CommandEmpty>No framework found.</CommandEmpty>
+                    <CommandEmpty>No Users found.</CommandEmpty>
                     <CommandGroup>
                       {users?.searchUsers?.map((user: User) => (
                         <CommandItem
@@ -223,7 +223,7 @@ export const AppSidebar = ({
         </Sidebar>
       </Sidebar>
 
-      <AlertDialog open={openCreateGroup} onOpenChange={() => setCreateGroup}>
+      <AlertDialog open={openCreateGroup} onOpenChange={setCreateGroup}>
         <AlertDialogContent className="gap-8">
           <AlertDialogHeader>
             <AlertDialogTitle>Chat Group Name</AlertDialogTitle>

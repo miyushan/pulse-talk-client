@@ -5,6 +5,7 @@ export const SEND_MESSAGE = gql`
     sendMessage(chatRoomId: $chatRoomId, content: $content) {
       id
       content
+      createdAt
       user {
         id
         userName

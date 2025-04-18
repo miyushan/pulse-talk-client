@@ -20,10 +20,18 @@ import { LOGIN_USER_MUTATION } from "@/graphql/mutations/loginUserMutation";
 import { signInFormSchema, SignInFormSchema } from "./schema";
 import { handleLoginError } from "@/lib/auth";
 import { useAppStore } from "@/store/appStore";
+import { useEffect } from "react";
 
 export default function SignInForm() {
   const router = useRouter();
-  const { selectUser } = useAppStore((state) => state);
+  const { selectUser, resetUser, resetSelectedChatRoom } = useAppStore(
+    (state) => state
+  );
+
+  useEffect(() => {
+    resetUser();
+    resetSelectedChatRoom();
+  }, [resetUser, resetSelectedChatRoom]);
 
   const methods = useForm<SignInFormSchema>({
     resolver: zodResolver(signInFormSchema),
