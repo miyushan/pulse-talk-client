@@ -224,14 +224,16 @@ export const AppSidebar = ({
       </Sidebar>
 
       <AlertDialog open={openCreateGroup} onOpenChange={() => setCreateGroup}>
-        <AlertDialogContent>
+        <AlertDialogContent className="gap-8">
           <AlertDialogHeader>
             <AlertDialogTitle>Chat Group Name</AlertDialogTitle>
-            <SidebarInput
-              value={newChatName}
-              onChange={(e) => setNewChatName(e.target.value)}
-              placeholder="Search..."
-            />
+            <AlertDialogDescription className="">
+              <SidebarInput
+                value={newChatName}
+                onChange={(e) => setNewChatName(e.target.value)}
+                placeholder="Search..."
+              />
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
